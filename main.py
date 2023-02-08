@@ -12,6 +12,8 @@ REDIRECT_URI = os.getenv("REDIRECT_URI")
 TOKEN_PATH = os.getenv("TOKEN_PATH")
 chrome_user_profile = os.getenv("CHROME_USER_PROFILE")
 
+ticker = "AAPL"
+
 
 def make_webdriver():
     # Import selenium here because it's slow to import
@@ -26,12 +28,11 @@ def make_webdriver():
     return driver
 
 
-ticker = "AAPL"
 # Create a new client
 clienttda = tda.auth.easy_client(API_KEY, REDIRECT_URI, TOKEN_PATH, make_webdriver)
-# get price history every day
+# get price history every day from 1985-01-02 till today
 r = clienttda.get_price_history_every_day(ticker)
-# Check if the request was successful
+# Check if the request was successful 
 assert r.status_code == 200, r.raise_for_status()
 # store OHLCV data in a dataframe
 data = json.dumps(r.json()["candles"], indent=4)
@@ -39,3 +40,5 @@ data = json.dumps(r.json()["candles"], indent=4)
 df = pd.read_json(data)
 # print the dataframe
 print(df)
+# save the dataframe to a csv file
+df.to_csv(ticker + ".csv")
